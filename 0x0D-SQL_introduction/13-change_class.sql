@@ -1,2 +1,3 @@
--- Update score of Bob to 10 from 'second_table' of db 'hbtn_0c_0'
-UPDATE second_table SET score = 10 WHERE name = "Bob";
+-- Removes all records with a score <= 5 in the table second_table in my MySQL server.
+DELETE FROM `second_table`
+WHERE `score` <= 5;
