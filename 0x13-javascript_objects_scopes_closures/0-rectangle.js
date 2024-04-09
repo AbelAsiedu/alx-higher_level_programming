@@ -1,1 +1,2 @@
-1112222
+#!/usr/bin/node
+module.exports = class Rectangle { };
