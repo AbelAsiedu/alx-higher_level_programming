@@ -1,34 +1,41 @@
 #!/usr/bin/python3
 
-""" lists all State objects, and corresponding City objects,
-contained in the database """
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from relationship_city import Base, State, City
+import sys
+
+def list_states_cities(username, password, database_name):
+    # Create engine to connect to the database
+    engine = create_engine(f"mysql+mysqlconnector://{username}:{password}@localhost:3306/{database_name}")
+
+    # Bind the engine to the Base class
+    Base.metadata.bind = engine
+
+    # Create a session
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    # Query all State objects and corresponding City objects using the cities relationship
+    states = session.query(State).order_by(State.id).all()
+
+    # Iterate over each State and its associated City objects
+    for state in states:
+        print(f"{state.id}: {state.name}")
+        cities = sorted(state.cities, key=lambda city: city.id)  # Sort cities by id
+        for city in cities:
+            print(f"    {city.id}: {city.name}")
+
+    # Close the session
+    session.close()
 
 if __name__ == "__main__":
+    if len(sys.argv) != 4:
+        print("Usage: python 101-relationship_states_cities_list.py <username> <password> <database_name>")
+        sys.exit(1)
 
-    import sys
-    from sqlalchemy import create_engine
-    from sqlalchemy.ext.declarative import declarative_base
-    from sqlalchemy.orm import sessionmaker
-    from relationship_city import City
-    from relationship_state import Base, State
+    username = sys.argv[1]
+    password = sys.argv[2]
+    database_name = sys.argv[3]
 
-    inp = sys.argv
-    if len(inp) < 4:
-        exit(1)
-
-    conn_str = "mysql+mysqldb://{}:{}@localhost:3306/{}"
-    engine = create_engine(conn_str.format(inp[1], inp[2], inp[3]))
-    Session = sessionmaker(bind=engine)
-
-    Base.metadata.create_all(engine)
-
-    session = Session()
-    my_query = session.query(State) \
-                      .order_by(State.id) \
-                      .all()
-    for state in my_query:
-        print("{}: {}".format(state.id, state.name))
-        for city in state.cities:
-            print("\t{}: {}".format(city.id, city.name))
-
-    session.close()
+    list_states_cities(username, password, database_name)
